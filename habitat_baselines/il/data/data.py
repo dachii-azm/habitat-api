@@ -41,11 +41,13 @@ class EQADataset(Dataset):
         self.num_frames = num_frames
 
         self.sim = self.env.sim
-        self.episodes = self.env._dataset.episodes
-
+        self.episodes = self.env._dataset.episodes  
+        
+        #self.question_type = self.env._dataset.episodes.question_type
+        #print(self.episodes[1].question.question_type)
         self.q_vocab = self.env._dataset.question_vocab
         self.ans_vocab = self.env._dataset.answer_vocab
-
+        
         self.eval_save_results = config.EVAL_SAVE_RESULTS
 
         if self.config.DATASET.SPLIT == config.EVAL.SPLIT:

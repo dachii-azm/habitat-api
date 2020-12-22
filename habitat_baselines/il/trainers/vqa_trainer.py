@@ -61,6 +61,7 @@ class VQATrainer(BaseILTrainer):
             vqa_dataset, batch_size=config.IL.VQA.batch_size, shuffle=True
         )
 
+
         logger.info("train_loader has {} samples".format(len(vqa_dataset)))
 
         q_vocab_dict, ans_vocab_dict = vqa_dataset.get_vocab_dicts()
@@ -269,7 +270,6 @@ class VQATrainer(BaseILTrainer):
                 questions = questions.to(self.device)
                 answers = answers.to(self.device)
                 frame_queue = frame_queue.to(self.device)
-
                 scores, att_probs = model(frame_queue, questions)
 
                 loss = lossFn(scores, answers)

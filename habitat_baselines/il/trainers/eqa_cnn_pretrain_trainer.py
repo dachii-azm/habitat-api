@@ -68,6 +68,8 @@ class EQACNNPretrainTrainer(BaseILTrainer):
             )
         )
 
+        #possibility to num_class for vqa is 40
+        #default num_classes for eqa_cnn is 41
         model = MultitaskCNN(num_classes=41)
         model.train().to(self.device)
 
@@ -185,7 +187,8 @@ class EQACNNPretrainTrainer(BaseILTrainer):
                 len(eqa_cnn_pretrain_dataset)
             )
         )
-
+        #possibility to num_classes for vqa is 40
+        #default num_classes for eqa_cnn is 41
         model = MultitaskCNN(num_classes=41)
 
         state_dict = torch.load(checkpoint_path)
@@ -198,6 +201,7 @@ class EQACNNPretrainTrainer(BaseILTrainer):
         seg_loss = torch.nn.CrossEntropyLoss()
 
         np.random.seed(2)
+        #default size is (41, 3)
         self.colors = np.random.randint(255, size=(41, 3))
 
         t = 0

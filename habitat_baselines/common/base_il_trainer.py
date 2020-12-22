@@ -265,6 +265,7 @@ class BaseILTrainer(BaseTrainer):
         question: str,
         prediction: str,
         ground_truth: str,
+        q_type_num: int
     ) -> None:
         r"""For saving image results.
 
@@ -282,6 +283,15 @@ class BaseILTrainer(BaseTrainer):
         path = self.config.RESULTS_DIR.format(
             split=self.config.TASK_CONFIG.DATASET.SPLIT
         )
+        
+        #correctとincorrectのディレクトリを作成
+        if prediction == ground_truth:
+            path = os.path.join(path, "correct")
+        elif prediction != ground_truth:
+            path = os.path.join(path, "incorrect")
+
+        q_type_list = self.configure_type_list()
+        path = os.path.join(path, q_type_list[q_type_num])
 
         images = tensor_to_bgr_images(images_tensor)
 
@@ -304,6 +314,38 @@ class BaseILTrainer(BaseTrainer):
             os.path.join(path, "c_{}_{}_image.jpg".format(ckpt_idx, idx)),
             image,
         )
+
+
+    def classify_q_types(self, q_str):
+        if 'color' in q_str:
+            if 'in' in q_str:
+                return 2
+            else:
+                return 1
+        elif 'located' in q_str:
+            return 0
+        elif 'next' in q_str:
+            if 'in' in q_str:
+                return 4
+            else:
+                return 3
+        elif 'on' in q_str:
+            if 'in' in q_str:
+                return 6
+            else:
+                return 5
+        elif 'below' in q_str:
+            if 'in' in q_str:
+                return 9
+            else:
+                return 8
+        else:
+            return 7
+
+    def configure_type_list(self):
+        type_list = ['location', 'color', 'color_room', 'next_to', 'next_to_room', 'on', 'on_room', 'above', 'below', 'below_room']
+        return type_list
+
 
     def _save_vqa_results(
         self,
@@ -340,13 +382,21 @@ class BaseILTrainer(BaseTrainer):
         value, index = scores.max(0)
         prediction = list(ans_vocab_dict.keys())[index]
         ground_truth = list(ans_vocab_dict.keys())[answer]
+        q_type_list = self.configure_type_list()
+        q_type = q_type_list[self.classify_q_types(q_string)]
+        q_type_num = self.classify_q_types(q_string)
 
         print("Question: ", q_string)
         print("Predicted answer:", prediction)
         print("Ground-truth answer:", ground_truth)
+        print("Question_type: ", q_type)
+
+        f= open("result_vqa.txt", 'a')
+        f.write('['+str(q_string)+', '+str(prediction)+', '+ str(ground_truth)+', '+ str(q_type) + ']' + ","+"\n")
+        f.close()
 
         self._save_image_results(
-            idx, ckpt_idx, images, q_string, prediction, ground_truth
+            idx, ckpt_idx, images, q_string, prediction, ground_truth, q_type_num
         )
 
     def _save_rgb_results(
